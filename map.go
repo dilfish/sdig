@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dilfish/tools"
+	"io/ioutil"
 	"net"
+	"net/http"
 	"strings"
 )
 
@@ -27,10 +29,41 @@ func cb(line string) error {
 
 func NewMap() map[string]string {
 	ipMap = make(map[string]string)
-	err := tools.ReadLine("/tmp/map.txt", cb)
+	err := tools.ReadLine(*flagMapPath, cb)
 	if err != nil {
 		fmt.Println("read line error:", err)
 		return nil
 	}
 	return ipMap
+}
+
+func GetIPInfo(checkUrl, ip string) string {
+	resp, err := http.Get(checkUrl + "/" + ip)
+	if err != nil {
+		return err.Error()
+	}
+	defer resp.Body.Close()
+	bt, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err.Error()
+	}
+	arr := strings.Split(string(bt), "-")
+	if len(arr) != 6 {
+		return "bad info:" + string(bt)
+	}
+	return arr[1] + arr[3]
+}
+
+func SelfCheck(checkUrl string) error {
+	mp := NewMap()
+	if len(mp) == 0 {
+		return errors.New("bad map init")
+	}
+	for k, v := range mp {
+		ret := GetIPInfo(checkUrl, v)
+		if k != ret {
+			return errors.New("bad ip info:" + v +":" +  k+ ", it should be:" + ret)
+		}
+	}
+	return nil
 }

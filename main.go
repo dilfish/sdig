@@ -14,6 +14,8 @@ import (
 
 var flagDomain = flag.String("d", "www.qiniu.com", "domain name")
 var flagServer = flag.String("s", "119.29.29.29", "server ip")
+var flagSelfCheck = flag.String("sc", "http://baidu.com", "self check url")
+var flagMapPath = flag.String("m", "/tmp/map.txt", "map file path")
 
 func NewRequest(domain, clientIP string) *dns.Msg {
 	req := new(dns.Msg)
@@ -108,7 +110,7 @@ func CallWithIPList(domain string) error {
 	}
 	mp := NewMap()
 	if mp == nil {
-		fmt.Println("new map error")
+		log.Println("new map error")
 		return errors.New("read ip file error")
 	}
 	ch := make(chan RetInfo)
@@ -189,6 +191,15 @@ func CallWithIPList(domain string) error {
 
 func main() {
 	flag.Parse()
+	if *flagSelfCheck != "" {
+		err := SelfCheck(*flagSelfCheck)
+		if err != nil {
+			log.Println("SelfCheck error:", err)
+		} else {
+			log.Println("SelfCheck good")
+		}
+		return
+	}
 	if net.ParseIP(*flagServer) == nil {
 		log.Println("bad server ip", *flagServer)
 		return
