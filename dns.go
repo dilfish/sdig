@@ -1,3 +1,5 @@
+// sean at shanghai
+
 package main
 
 import (

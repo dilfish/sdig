@@ -1,3 +1,5 @@
+// sean at shanghai
+
 package main
 
 import "log"
@@ -9,10 +11,8 @@ func RunLevel(domain string, level *Level, finish chan struct{}) {
 	}
 	if level.UseIP != "" {
 		ch := make(chan RetInfo)
-		// log.Println("doing", level.Name)
 		go MakeRequest(domain, level.UseIP, level.Name, ch)
 		level.Ret = <-ch
-		log.Println("I got result", level.Ret)
 		close(ch)
 	}
 	for _, _ = range level.Member {
@@ -24,20 +24,13 @@ func RunLevel(domain string, level *Level, finish chan struct{}) {
 }
 
 func PrintRet(level *Level, parentResult string) {
+	if level.Ret.Result != parentResult && level.Ret.Result != "" {
+		log.Println("result", level.Name, level.Ret.Result)
+	}
 	for _, m := range level.Member {
-		p := parentResult
 		if level.Ret.Result != "" {
-			p = parentResult
+			parentResult = level.Ret.Result
 		}
-		PrintRet(m, p)
-	}
-	if level.Name == RootName {
-		return
-	}
-	if parentResult != "" && parentResult == level.Ret.Result {
-		return
-	}
-	if level.Ret.Result != "" {
-		log.Println("result", level.Name, level.Ret.Result, parentResult)
+		PrintRet(m, parentResult)
 	}
 }

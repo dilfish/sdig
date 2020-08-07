@@ -1,3 +1,7 @@
+// sean at shanghai
+// todo: enhence map.txt
+// a better printret function
+
 package main
 
 import (
@@ -18,9 +22,13 @@ func main() {
 		log.Println("bad server ip", *flagServer)
 		return
 	}
-	if *flagDomain == "" {
+	domain := *flagDomain
+	if domain == "" {
 		log.Println("empty domain")
 		return
+	}
+	if domain[len(domain) - 1] != '.' {
+		domain = domain + "."
 	}
 	mp := NewMap(*flagMapPath)
 	if len(mp) == 0 {

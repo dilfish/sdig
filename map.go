@@ -1,3 +1,5 @@
+// sean at shanghai
+
 package main
 
 import (
@@ -11,6 +13,10 @@ import (
 var ipMap map[string]string
 
 func cb(line string) error {
+	// comment
+	if len(line) > 0 && line[0] == '#' {
+		return nil
+	}
 	arr := strings.Split(line, " ")
 	if len(arr) != 2 {
 		log.Println("format is not 2")
