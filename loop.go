@@ -9,7 +9,7 @@ import "log"
 func SameResult(member []*Level) string {
     var same string
     for _, m := range member {
-        if m.Ret.Result == "" {
+        if same == "" {
             same = m.Ret.Result
         }
         // not same
