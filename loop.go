@@ -4,6 +4,23 @@ package main
 
 import "log"
 
+// SameResult checkes if this array has same result
+// if so, return the one
+func SameResult(member []*Level) string {
+    var same string
+    for _, m := range member {
+        if m.Ret.Result == "" {
+            same = m.Ret.Result
+        }
+        // not same
+        if m.Ret.Result != same {
+            return ""
+        }
+    }
+    return same
+}
+
+// RunLevel run dns request level by level
 func RunLevel(domain string, level *Level, finish chan struct{}) {
 	children := make(chan struct{})
 	for _, m := range level.Member {
@@ -19,10 +36,15 @@ func RunLevel(domain string, level *Level, finish chan struct{}) {
 		<-children
 	}
 	close(children)
+        same := SameResult(level.Member)
+        if same != "" {
+            level.Ret.Result = same
+        }
 	finish<-struct{}{}
 	return
 }
 
+// PrintRet print all result by level
 func PrintRet(level *Level, parentResult string) {
 	if level.Ret.Result != parentResult && level.Ret.Result != "" {
 		log.Println("result", level.Name, level.Ret.Result)
