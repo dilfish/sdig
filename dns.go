@@ -11,11 +11,16 @@ import (
 	"time"
 )
 
+type RequestArgs struct {
+	Domain string
+	Type uint16
+}
+
 // NewRequest make a dns request struct with specified domain
 // and client ip
-func NewRequest(domain, clientIP string) *dns.Msg {
+func NewRequest(domain, clientIP string, tp uint16) *dns.Msg {
 	req := new(dns.Msg)
-	req.SetQuestion(domain, dns.TypeA)
+	req.SetQuestion(domain, tp)
 	if clientIP != "" {
 		ip := net.ParseIP(clientIP)
 		if ip == nil {
@@ -54,10 +59,10 @@ type RetInfo struct {
 
 // MakeRequest make a request on the fly
 // write back result to channel
-func MakeRequest(domain, clientIP, region string, ch chan RetInfo) {
+func MakeRequest(domain, clientIP, region string, tp uint16, ch chan RetInfo) {
 	var r RetInfo
 	r.Region = region
-	req := NewRequest(domain, clientIP)
+	req := NewRequest(domain, clientIP, tp)
 	msg, _, err := MakeCall(req)
 	if err != nil {
 		r.Result = err.Error()
@@ -80,4 +85,16 @@ func MakeRequest(domain, clientIP, region string, ch chan RetInfo) {
 		r.Result = str
 	}
 	ch<-r
+}
+
+func IsSupportType(str string) uint16 {
+	t := dns.TypeNone
+	str = strings.ToUpper(str)
+	switch str {
+	case "A":
+		t = dns.TypeA
+	case "AAAA":
+		t = dns.TypeAAAA
+	}
+	return t
 }

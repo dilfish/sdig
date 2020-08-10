@@ -6,6 +6,7 @@ package main
 
 import (
 	"flag"
+	"github.com/miekg/dns"
 	"log"
 	"net"
 )
@@ -13,6 +14,7 @@ import (
 var flagDomain = flag.String("d", "www.qiniu.com", "domain name")
 var flagServer = flag.String("s", "119.29.29.29", "server ip")
 var flagMapPath = flag.String("m", "/tmp/map.txt", "map file path")
+var flagType = flag.String("t", "A", "dns type, default A")
 
 
 func main() {
@@ -27,6 +29,11 @@ func main() {
 		log.Println("empty domain")
 		return
 	}
+	t := IsSupportType(*flagType)
+	if t == dns.TypeNone {
+		log.Println("we do not support type:", *flagType)
+		return
+	}
 	if domain[len(domain) - 1] != '.' {
 		domain = domain + "."
 	}
@@ -37,7 +44,10 @@ func main() {
 	}
 	level := InitLevel(mp)
 	finish := make(chan struct{})
-	go RunLevel(*flagDomain, level, finish)
+	var req RequestArgs
+	req.Type = uint16(t)
+	req.Domain = *flagDomain
+	go RunLevel(req, level, finish)
 	<-finish
 	close(finish)
 	PrintRet(level, "")

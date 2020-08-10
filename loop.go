@@ -21,14 +21,14 @@ func SameResult(member []*Level) string {
 }
 
 // RunLevel run dns request level by level
-func RunLevel(domain string, level *Level, finish chan struct{}) {
+func RunLevel(req RequestArgs, level *Level, finish chan struct{}) {
 	children := make(chan struct{})
 	for _, m := range level.Member {
-		go RunLevel(domain, m, children)
+		go RunLevel(req, m, children)
 	}
 	if level.UseIP != "" {
 		ch := make(chan RetInfo)
-		go MakeRequest(domain, level.UseIP, level.Name, ch)
+		go MakeRequest(req.Domain, level.UseIP, level.Name, req.Type, ch)
 		level.Ret = <-ch
 		close(ch)
 	}
