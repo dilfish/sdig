@@ -1,21 +1,27 @@
 // sean at shanghai
-// todo: enhence map.txt
-// a better printret function
 
 package main
 
 import (
 	"flag"
-	"github.com/miekg/dns"
 	"log"
 	"net"
+
+	"github.com/miekg/dns"
 )
 
 var flagDomain = flag.String("d", "www.qiniu.com", "domain name")
+
+// 1.1.1.1 does not support edns
+// 8.8.8.8 support edns
 var flagServer = flag.String("s", "119.29.29.29", "server ip")
 var flagMapPath = flag.String("m", "/tmp/map.txt", "map file path")
 var flagType = flag.String("t", "A", "dns type, default A")
+var flagVerbose = flag.Bool("v", false, "verbose print")
+var flagRateLimit = flag.Int("r", 1000, "rate limit qps")
 
+// rate limiter
+var rateLimiter *QPSRateLimiter
 
 func main() {
 	flag.Parse()
@@ -34,8 +40,11 @@ func main() {
 		log.Println("we do not support type:", *flagType)
 		return
 	}
-	if domain[len(domain) - 1] != '.' {
+	if domain[len(domain)-1] != '.' {
 		domain = domain + "."
+	}
+	if *flagRateLimit != 0 {
+		rateLimiter = NewQPSRateLimiter(*flagRateLimit)
 	}
 	mp := NewMap(*flagMapPath)
 	if len(mp) == 0 {

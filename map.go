@@ -4,16 +4,18 @@ package main
 
 import (
 	"errors"
-	"github.com/dilfish/tools"
 	"log"
 	"net"
 	"strings"
+
+	"github.com/dilfish/tools"
 )
 
 var ipMap map[string]string
 
 func cb(line string) error {
 	// comment
+	log.Println("read mmap", line)
 	if len(line) > 0 && line[0] == '#' {
 		return nil
 	}
@@ -31,9 +33,11 @@ func cb(line string) error {
 		return errors.New("bad ip format")
 	}
 	ipMap[arr[0]] = arr[1]
+	log.Println("read map", arr[0], arr[1])
 	return nil
 }
 
+// NewMap read geo-ip information from a txt file
 func NewMap(path string) map[string]string {
 	ipMap = make(map[string]string)
 	err := tools.ReadLine(path, cb)

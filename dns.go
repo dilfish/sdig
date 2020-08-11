@@ -3,17 +3,20 @@
 package main
 
 import (
-	"github.com/miekg/dns"
 	"log"
 	"net"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/miekg/dns"
 )
 
+// RequestArgs include domain and type
+// we will query for every view
 type RequestArgs struct {
 	Domain string
-	Type uint16
+	Type   uint16
 }
 
 // NewRequest make a dns request struct with specified domain
@@ -48,24 +51,34 @@ func MakeCall(req *dns.Msg) (msg *dns.Msg, duration time.Duration, err error) {
 	s := *flagServer + ":53"
 	count := 0
 	for {
+		if rateLimiter != nil {
+			rateLimiter.WaitForToken()
+		}
 		msg, duration, err = c.Exchange(req, s)
-		if err != nil && strings.Index(err.Error(), "i/o timeout") >= 0 {
+		if err == nil {
 			return
 		}
+		// I could not find out this error variable
+		if err != nil && strings.Index(err.Error(), "timeout") < 0 {
+			return
+		}
+		if *flagVerbose {
+			log.Println("retry for", req.Id)
+		}
 		count = count + 1
-		if count > 2 {
+		if count > 5 {
 			break
 		}
 	}
 	return
 }
 
-
 // RetInfo stands for
 // a result of dns request
 type RetInfo struct {
 	Region string
 	Result string
+	Id     uint16
 }
 
 // MakeRequest make a request on the fly
@@ -74,6 +87,7 @@ func MakeRequest(domain, clientIP, region string, tp uint16, ch chan RetInfo) {
 	var r RetInfo
 	r.Region = region
 	req := NewRequest(domain, clientIP, tp)
+	r.Id = req.Id
 	msg, _, err := MakeCall(req)
 	if err != nil {
 		r.Result = err.Error()
@@ -87,6 +101,9 @@ func MakeRequest(domain, clientIP, region string, tp uint16, ch chan RetInfo) {
 			case *dns.CNAME:
 				c := a.(*dns.CNAME)
 				strs = append(strs, c.Target)
+			case *dns.AAAA:
+				aaaa := a.(*dns.AAAA)
+				strs = append(strs, aaaa.AAAA.String())
 			default:
 				strs = append(strs, a.String())
 			}
@@ -95,9 +112,10 @@ func MakeRequest(domain, clientIP, region string, tp uint16, ch chan RetInfo) {
 		str := strings.Join(strs, "\n")
 		r.Result = str
 	}
-	ch<-r
+	ch <- r
 }
 
+// IsSupportType return the type value if we support
 func IsSupportType(str string) uint16 {
 	t := dns.TypeNone
 	str = strings.ToUpper(str)
@@ -106,6 +124,8 @@ func IsSupportType(str string) uint16 {
 		t = dns.TypeA
 	case "AAAA":
 		t = dns.TypeAAAA
+	case "CNAME":
+		t = dns.TypeCNAME
 	}
 	return t
 }

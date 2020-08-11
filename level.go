@@ -13,14 +13,14 @@ const RootName = "all"
 // not have a level, ie, it's the lowest
 // level, it should have a useip
 type Level struct {
-	Name string
-	UseIP string
-	Level int
-	Ret RetInfo
+	Name   string
+	UseIP  string
+	Level  int
+	Ret    RetInfo
 	Member []*Level
 }
 
-
+// PrintLevel is for debug
 func PrintLevel(level *Level) {
 	log.Println("level", level.Level, level.Name, " has ", len(level.Member), "memebers")
 	for _, v := range level.Member {
@@ -31,6 +31,8 @@ func PrintLevel(level *Level) {
 	}
 }
 
+// CompressLevel loops from the map
+// until we get the last level: all
 func CompressLevel(m map[string]string, level *Level, ipMap map[string]string) *Level {
 	var children []string
 	// pick up all direct children
@@ -109,17 +111,19 @@ func InitLevel(ipMap map[string]string) *Level {
 	mpm := make(map[string]string)
 	for k, v := range mpd {
 		for kk, _ := range mpi {
-			mpm[k + kk] = v + kk
+			mpm[k+kk] = v + kk
 		}
 	}
 	for k, _ := range mpi {
-		mpm["全国" + k] = "大中华区"
+		mpm["全国"+k] = "大中华区"
 	}
 	mpm["香港"] = "港澳台"
 	mpm["澳门"] = "港澳台"
 	mpm["台湾"] = "港澳台"
 	mpm["港澳台"] = "大中华区"
-	mpm["大中华区"] = "亚洲"
+	// we treat 大中华区 as a separate continent
+	// as it would be 亚洲
+	mpm["大中华区"] = RootName
 
 	mpm["亚洲"] = RootName
 	mpm["印度"] = "亚洲"
