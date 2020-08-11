@@ -15,7 +15,6 @@ var ipMap map[string]string
 
 func cb(line string) error {
 	// comment
-	log.Println("read mmap", line)
 	if len(line) > 0 && line[0] == '#' {
 		return nil
 	}
@@ -33,7 +32,6 @@ func cb(line string) error {
 		return errors.New("bad ip format")
 	}
 	ipMap[arr[0]] = arr[1]
-	log.Println("read map", arr[0], arr[1])
 	return nil
 }
 

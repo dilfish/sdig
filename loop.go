@@ -2,7 +2,10 @@
 
 package main
 
-import "log"
+import (
+	"fmt"
+	"log"
+)
 
 // SameResult checkes if this array has same result
 // if so, return the one
@@ -31,7 +34,7 @@ func RunLevel(req RequestArgs, level *Level, finish chan struct{}) {
 		go MakeRequest(req.Domain, level.UseIP, level.Name, req.Type, ch)
 		level.Ret = <-ch
 		if *flagVerbose {
-			log.Println("request info:", level.Ret.Id, level.Ret.Region)
+			log.Println("request info:", level.Ret.Id, level.Ret.Region, level.Ret.Result)
 		}
 		close(ch)
 	}
@@ -49,13 +52,14 @@ func RunLevel(req RequestArgs, level *Level, finish chan struct{}) {
 
 // PrintRet print all result by level
 func PrintRet(level *Level, parentResult string) {
-	if level.Ret.Result != parentResult && level.Ret.Result != "" {
-		log.Println("result:", level.Name+"\n"+level.Ret.Result)
+	thisRet := level.Ret.Result
+	if thisRet != parentResult && thisRet != "" {
+		fmt.Println("<" + level.Name + ">\n" + thisRet)
+	}
+	if thisRet != "" {
+		parentResult = thisRet
 	}
 	for _, m := range level.Member {
-		if level.Ret.Result != "" {
-			parentResult = level.Ret.Result
-		}
 		PrintRet(m, parentResult)
 	}
 }
