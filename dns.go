@@ -46,7 +46,18 @@ func NewRequest(domain, clientIP string, tp uint16) *dns.Msg {
 func MakeCall(req *dns.Msg) (msg *dns.Msg, duration time.Duration, err error) {
 	c := new(dns.Client)
 	s := *flagServer + ":53"
-	return c.Exchange(req, s)
+	count := 0
+	for {
+		msg, duration, err = c.Exchange(req, s)
+		if err != nil && strings.Index(err.Error(), "i/o timeout") >= 0 {
+			return
+		}
+		count = count + 1
+		if count > 2 {
+			break
+		}
+	}
+	return
 }
 
 

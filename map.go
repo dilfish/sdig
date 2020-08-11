@@ -23,7 +23,7 @@ func cb(line string) error {
 	}
 	arr := strings.Split(line, " ")
 	if len(arr) != 2 {
-		log.Println("format is not 2")
+		log.Println("format is not 2", arr)
 		return errors.New("bad map format")
 	}
 	if net.ParseIP(arr[1]) == nil {

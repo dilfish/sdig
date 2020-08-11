@@ -47,7 +47,8 @@ func RunLevel(req RequestArgs, level *Level, finish chan struct{}) {
 // PrintRet print all result by level
 func PrintRet(level *Level, parentResult string) {
 	if level.Ret.Result != parentResult && level.Ret.Result != "" {
-		log.Println("result", level.Name, level.Ret.Result)
+		log.Println("result:", level.Name)
+		log.Println("\n" + level.Ret.Result)
 	}
 	for _, m := range level.Member {
 		if level.Ret.Result != "" {

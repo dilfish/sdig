@@ -46,7 +46,7 @@ func main() {
 	finish := make(chan struct{})
 	var req RequestArgs
 	req.Type = uint16(t)
-	req.Domain = *flagDomain
+	req.Domain = domain
 	go RunLevel(req, level, finish)
 	<-finish
 	close(finish)
