@@ -120,8 +120,31 @@ func InitLevel(ipMap map[string]string) *Level {
 	mpm["台湾"] = "港澳台"
 	mpm["港澳台"] = "大中华区"
 	mpm["大中华区"] = "亚洲"
-	mpm["日本"] = "亚洲"
+
 	mpm["亚洲"] = RootName
+	mpm["印度"] = "亚洲"
+	mpm["日本"] = "亚洲"
+	mpm["泰国"] = "亚洲"
+	mpm["韩国"] = "亚洲"
+
+	mpm["中东"] = RootName
+	mpm["以色列"] = "中东"
+
+	mpm["欧洲"] = RootName
+	mpm["德国"] = "欧洲"
+	mpm["法国"] = "欧洲"
+	mpm["俄罗斯"] = "欧洲"
+	mpm["英国"] = "欧洲"
+
+	mpm["南美洲"] = RootName
+	mpm["巴西"] = "南美洲"
+
+	mpm["大洋洲"] = RootName
+	mpm["澳大利亚"] = "大洋洲"
+
+	mpm["北美洲"] = RootName
+	mpm["美国"] = "北美洲"
+
 	var level Level
 	level.Name = RootName
 	level.Level = 1

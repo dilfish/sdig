@@ -17,6 +17,10 @@ func cb(line string) error {
 	if len(line) > 0 && line[0] == '#' {
 		return nil
 	}
+	// space
+	if len(line) < 2 {
+		return nil
+	}
 	arr := strings.Split(line, " ")
 	if len(arr) != 2 {
 		log.Println("format is not 2")
