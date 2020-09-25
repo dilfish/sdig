@@ -1,4 +1,4 @@
-module sdig
+module github.ccom/dilfish/sdig
 
 go 1.13
 
