@@ -1,6 +1,6 @@
 module github.ccom/dilfish/sdig
 
-go 1.13
+go 1.15
 
 require (
 	github.com/dilfish/tools v1.0.2
