@@ -13,6 +13,7 @@ import (
 
 var ipMap map[string]string
 
+// callback function
 func cb(line string) error {
 	// comment
 	if len(line) > 0 && line[0] == '#' {

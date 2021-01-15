@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+// QPSRateLimiter count it in
+// predefined time interval
 type QPSRateLimiter struct {
 	count int
 	init  int
@@ -21,6 +23,8 @@ func NewQPSRateLimiter(c int) *QPSRateLimiter {
 	return &QPSRateLimiter{count: c, init: c, start: time.Now()}
 }
 
+// GetToken minus 1 from count
+// if down to 0, it return false
 func (q *QPSRateLimiter) GetToken() bool {
 	q.lock.Lock()
 	defer q.lock.Unlock()
@@ -36,6 +40,7 @@ func (q *QPSRateLimiter) GetToken() bool {
 	return true
 }
 
+// WaitForToken is a for loop wait until got token
 func (q *QPSRateLimiter) WaitForToken() {
 	for {
 		if q.GetToken() == false {

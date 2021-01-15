@@ -210,6 +210,7 @@ var mapList = `
 香港 43.229.16.0
 `
 
+// GenDefaultMap read map from a file and write it to default file
 func GenDefaultMap(fn string) error {
 	file, err := os.Create(fn)
 	if err != nil {
