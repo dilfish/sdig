@@ -58,16 +58,18 @@ func MakeCall(req *dns.Msg) (msg *dns.Msg, duration time.Duration, err error) {
 		if err == nil {
 			return
 		}
-		// I could not find out this error variable
-		if err != nil && strings.Index(err.Error(), "timeout") < 0 {
+		ope, ok := err.(*net.OpError)
+		// time out error
+		if ok && ope.Timeout() {
+			count = count + 1
+			if count > 5 {
+				break
+			}
+			if *flagVerbose {
+				log.Println("retry for", req.Id)
+			}
+		} else {
 			return
-		}
-		if *flagVerbose {
-			log.Println("retry for", req.Id)
-		}
-		count = count + 1
-		if count > 5 {
-			break
 		}
 	}
 	return
