@@ -10,10 +10,9 @@ import (
 	"github.com/miekg/dns"
 )
 
-const DefaultMapFn = "./tmp.sdig.txt"
+const DefaultMapFn = ".tmp.sdig.txt"
 
 var flagDomain = flag.String("d", "dilfish.dev.", "domain name")
-
 // 1.1.1.1 does not support edns
 // 8.8.8.8 support edns
 var flagServer = flag.String("s", "119.29.29.29", "server ip")
@@ -50,7 +49,7 @@ func main() {
 	}
 	mp := NewMap(*flagMapPath)
 	if len(mp) == 0 {
-		log.Println("map file does not exist, using default one")
+		log.Println("map file does not exist, using default one: " + DefaultMapFn)
 		err := GenDefaultMap(DefaultMapFn)
 		if err != nil {
 			log.Println("gen default map error:", err)
