@@ -48,8 +48,12 @@ func main() {
 		rateLimiter = NewQPSRateLimiter(*flagRateLimit)
 	}
 	mp := NewMap(*flagMapPath)
+    if len(mp) == 0 {
+        log.Println("map file does not exist, try to use default one: " + DefaultMapFn)
+        mp = NewMap(DefaultMapFn)
+    }
 	if len(mp) == 0 {
-		log.Println("map file does not exist, using default one: " + DefaultMapFn)
+		log.Println("no map file could be used, using built-in map file: " + DefaultMapFn)
 		err := GenDefaultMap(DefaultMapFn)
 		if err != nil {
 			log.Println("gen default map error:", err)
