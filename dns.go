@@ -17,6 +17,8 @@ import (
 type RequestArgs struct {
 	Domain string
 	Type   uint16
+	View   string
+	ViewIP string
 }
 
 // NewRequest make a dns request struct with specified domain
@@ -85,36 +87,36 @@ type RetInfo struct {
 
 // MakeRequest make a request on the fly
 // write back result to channel
-func MakeRequest(domain, clientIP, region string, tp uint16, ch chan RetInfo) {
+func MakeRequest(domain, clientIP, region string, tp uint16) (RetInfo, error) {
 	var r RetInfo
 	r.Region = region
 	req := NewRequest(domain, clientIP, tp)
 	r.Id = req.Id
 	msg, _, err := MakeCall(req)
 	if err != nil {
-		r.Result = err.Error()
-	} else {
-		strs := make([]string, 0)
-		for _, a := range msg.Answer {
-			switch a.(type) {
-			case *dns.A:
-				r := a.(*dns.A)
-				strs = append(strs, r.A.String())
-			case *dns.CNAME:
-				c := a.(*dns.CNAME)
-				strs = append(strs, c.Target)
-			case *dns.AAAA:
-				aaaa := a.(*dns.AAAA)
-				strs = append(strs, aaaa.AAAA.String())
-			default:
-				strs = append(strs, a.String())
-			}
-		}
-		sort.Strings(strs)
-		str := strings.Join(strs, "\n")
-		r.Result = str
+		log.Println("make call error:", req)
+		return r, err
 	}
-	ch <- r
+	strs := make([]string, 0)
+	for _, a := range msg.Answer {
+		switch a.(type) {
+		case *dns.A:
+			r := a.(*dns.A)
+			strs = append(strs, r.A.String())
+		case *dns.CNAME:
+			c := a.(*dns.CNAME)
+			strs = append(strs, c.Target)
+		case *dns.AAAA:
+			aaaa := a.(*dns.AAAA)
+			strs = append(strs, aaaa.AAAA.String())
+		default:
+			strs = append(strs, a.String())
+		}
+	}
+	sort.Strings(strs)
+	str := strings.Join(strs, "\n")
+	r.Result = str
+	return r, nil
 }
 
 // IsSupportType return the type value if we support

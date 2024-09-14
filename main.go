@@ -13,7 +13,7 @@ import (
 const DefaultMapFn = ".tmp.sdig.txt"
 
 var flagDomain = flag.String("d", "dilfish.dev.", "domain name")
-// 1.1.1.1 does not support edns
+
 // 8.8.8.8 support edns
 var flagServer = flag.String("s", "119.29.29.29", "server ip")
 var flagMapPath = flag.String("m", "/tmp/map.txt", "map file path")
@@ -48,10 +48,10 @@ func main() {
 		rateLimiter = NewQPSRateLimiter(*flagRateLimit)
 	}
 	mp := NewMap(*flagMapPath)
-    if len(mp) == 0 {
-        log.Println("map file does not exist, try to use default one: " + DefaultMapFn)
-        mp = NewMap(DefaultMapFn)
-    }
+	if len(mp) == 0 {
+		log.Println("map file does not exist, try to use default one: " + DefaultMapFn)
+		mp = NewMap(DefaultMapFn)
+	}
 	if len(mp) == 0 {
 		log.Println("no map file could be used, using built-in map file: " + DefaultMapFn)
 		err := GenDefaultMap(DefaultMapFn)
@@ -65,14 +65,13 @@ func main() {
 			return
 		}
 	}
-	level := InitLevel(mp)
-	finish := make(chan struct{})
 	var req RequestArgs
 	req.Type = uint16(t)
 	req.Domain = domain
-	go RunLevel(req, level, finish)
-	<-finish
-	close(finish)
-	PrintRet(level, "")
-	return
+	for k, v := range mp {
+		req.View = k
+		req.ViewIP = v
+		RunRequest(req)
+	}
+	PrintResult()
 }
